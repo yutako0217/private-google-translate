@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <title>Translation API</title>
+
+    <script>
+        async function doTranslate($this) {
+            const glossary_select = document.getElementById("glossaries").value;
+            const response = await axios({
+                "method": "POST",
+                "url": "/translate",
+                "data": {
+                    "text": $this.value,
+                    "glossaryname": glossary_select
+                }
+            })
+            document.form2.output.value = response.data;
+            console.log(response.data);
+        }
+
+        async function submitTranslate() {
+            const glossary_select = document.getElementById("glossaries").value;
+            const response = await axios({
+                "method": "POST",
+                "url": "/translate",
+                "data": {
+                    "text": document.form1.input.value,
+                    "glossaryname": glossary_select
+                }
+            })
+            document.form2.output.value = response.data;
+            console.log(response.data);
+        }
+
+       async function getGlossaryCat() {
+            const glossary_select = document.getElementById("glossaries").value;
+            const response = await axios({
+                "method": "POST",
+                "url": "/glossarycat",
+                "data": {
+                    "glossaryname": glossary_select
+                }
+            })
+            document.getElementById("glossary_cat").value = response.data;
+            console.log(response.data);
+        }
+    </script>
+</head>
+<body>
+<h3 class="text-muted">Glossary</h3>
+<div class="glossary_select cp_sl02">
+    <label for="glossaries"></label>
+    <select id="glossaries" required>
+        <option value="" hidden>Choose</option>
+        <option value="---">---</option>
+        {% for glossary in glossaries %}
+            <option value="{{ glossary }}">{{ glossary }}</option>
+        {% endfor %}
+    </select>
+</div>
+<a href="#" class="cp_btn" onclick="getGlossaryCat()">Show Glossary</a>
+<div class="glossary_cat">
+    <label for="glossary_cat"></label>
+    <textarea class="textarea" id="glossary_cat" name="glossary_cat" rows="10"></textarea><br>
+</div>
+
+<form name="form1">
+    <h3 class="text-muted">Input</h3>
+    <label for="input"></label>
+    <textarea class="textarea" id="input" name="input" rows="10" onInput="doTranslate(this)"></textarea><br>
+</form>
+<a href="#" class="cp_btn" onclick="submitTranslate()">Translate!!</a>
+
+<form name="form2">
+    <h3 class="text-muted">Translated</h3>
+    <label for="output"></label>
+    <textarea class="textarea" id="output" name="output" rows="10"></textarea><br>
+</form>
+
+
+
+<style>
+    .text-muted {
+        position: center;
+        font-family: "ＭＳ ゴシック", sans-serif;
+    }
+
+    .textarea {
+        width: 100%
+    }
+
+    a.cp_btn {
+        position: relative;
+        display: block;
+        width: 100%;
+        padding: 0.8em;
+        text-decoration: none;
+        text-overflow: ellipsis;
+        font-family: "ＭＳ ゴシック", sans-serif;
+        background: #ffffff;
+        border: 1px solid #bbbbbb;
+        border-radius: 2px;
+        padding-right: 1em;
+    }
+
+    a.cp_btn:active {
+        border-bottom: 2px solid #ffffff;
+        box-shadow: 0 0 2px rgba(0, 0, 0, 0.30);
+    }
+
+    .glossary_select {
+        overflow: hidden;
+        width: 100%;
+        margin: 2em auto;
+        text-align: center;
+    }
+
+    .glossary_select select {
+        width: 100%;
+        padding-right: 1em;
+        cursor: pointer;
+        text-indent: 0.01px;
+        text-overflow: ellipsis;
+        font-family: "ＭＳ ゴシック", sans-serif;
+
+        border: none;
+        outline: none;
+        background: transparent;
+        background-image: none;
+        box-shadow: none;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+
+    .glossary_select select::-ms-expand {
+        display: none;
+    }
+
+    .glossary_select.cp_sl02 {
+        position: relative;
+        border: 1px solid #bbbbbb;
+        border-radius: 2px;
+        background: #ffffff;
+    }
+
+    .glossary_select.cp_sl02::before {
+        position: absolute;
+        top: 0.8em;
+        right: 0.9em;
+        width: 0;
+        height: 0;
+        padding: 0;
+        content: '';
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-top: 6px solid #666666;
+        pointer-events: none;
+    }
+
+    .glossary_select.cp_sl02:after {
+        position: absolute;
+        top: 0;
+        right: 2.5em;
+        bottom: 0;
+        width: 1px;
+        content: '';
+        border-left: 1px solid #bbbbbb;
+    }
+
+    .glossary_select.cp_sl02 select {
+        padding: 8px 38px 8px 8px;
+        color: #666666;
+    }
+
+</style>
+
+
+</body>
+</html>
