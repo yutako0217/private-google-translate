@@ -1,4 +1,5 @@
 import os
+from sys import exit
 
 from flask import Flask, render_template, request, make_response, json
 
@@ -44,14 +45,23 @@ def translate():
     if request.method == 'POST':
         content = request.json
         contents = content['text']
+        if contents == '':
+            return ''
         glossaryname = content['glossaryname']
+        language_from = content['from']
+        language_to = content['to']
+        if language_from == '':
+            language_from = 'ja'
+        if language_to == '':
+            language_to = 'en'
+
         client = TranslateClient(PROJECT_ID, GLOSSARY_LOCATION)
 
         if glossaryname == "" or glossaryname == "---":
-            translated = client.simple_translate(contents, "ja", "en", None)
+            translated = client.simple_translate(contents, language_to, language_from, None)
         else:
             glossary_config = GlossaryConfig(glossaryname, GLOSSARY_LOCATION)
-            translated = client.simple_translate(contents, "ja", "en", glossary_config)
+            translated = client.simple_translate(contents, language_to, language_from, glossary_config)
         print(translated)
     merged_string = ''.join(translated)
     return merged_string
