@@ -20,7 +20,7 @@ class TranslateClient:
     def get_glossary_config(self, glossary_name, glossary_location):
         return GlossaryConfig(glossary_name, glossary_location)
 
-    def simple_translate(self, text, target_lang_code, source_lang_code=None, glossary_config: GlossaryConfig = None):
+    def simple_translate(self, text, target_lang_code, source_lang_code=None, glossary_config = None):
 
         contents = [text]
         translatedlist = list()

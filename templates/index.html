@@ -1,3 +1,4 @@
+<meta http-equiv="content-type" charset="utf-8">
 <!DOCTYPE html>
 <html lang="en-US">
 <head>
@@ -54,30 +55,59 @@
             document.getElementById("glossary_cat").value = response.data;
             console.log(response.data);
         }
+
+        async function createGlossary() {
+            const glossary_name = document.getElementById("glossary_name").value;
+            const glossary_input = document.getElementById("glossary_cat").value;
+            const response = await axios({
+                "method": "POST",
+                "url": "/createglossary",
+                "data": {
+                    "glossaryname": glossary_name,
+                    "glossary_input": glossary_input
+
+                }
+            });
+        }
     </script>
 </head>
 <body>
 
 <h3 class="text-muted">Glossary List</h3>
-<div class="glossary_select cp_sl02">
-    <label for="glossaries"></label>
-    <select id="glossaries" required>
-        <option value="" hidden>Choose</option>
-        <option value="---">---</option>
-        {% for glossary in glossaries %}
-            <option value="{{ glossary }}">{{ glossary }}</option>
-        {% endfor %}
-    </select>
+<div class="parent">
+    <div class="child">
+        <div class="glossary_select cp_sl02">
+            <label for="glossaries"></label>
+            <select id="glossaries" required>
+                <option value="" hidden>Choose</option>
+                <option value="---">---</option>
+                {% for glossary in glossaries %}
+                    <option value="{{ glossary }}">{{ glossary }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="child">
+        <a href="#" class="cp_btn" onclick="getGlossaryCat()">Show Glossary</a>
+    </div>
 </div>
-<a href="#" class="cp_btn" onclick="getGlossaryCat()">Show Glossary</a>
 <div class="glossary_cat">
     <label for="glossary_cat"></label>
     <textarea class="textarea" id="glossary_cat" name="glossary_cat" rows="10"></textarea><br>
 </div>
 
+<h3 class="text-muted">表示されているGlossaryを新しく登録する場合は、下にGlossary名を入力して、[Create Glossary]ボタンを押してください</h3>
+<div class="parent">
+    <div class="child">
+        <input type="text" id="glossary_name" name="glossary_name" width="300"><br>
+    </div>
+    <div class="child">
+        <a href="#" class="cp_btn" onclick="createGlossary()">Create Glossary</a>
+    </div>
+</div>
 <h3 class="text-muted">Language Select (Default: Japanese　to English)</h3>
-<div class="lang_selector">
-    <div class="lang_selector_child">
+<div class="parent">
+    <div class="child">
         <h4>From Language</h4>
         <div class="glossary_select cp_sl02">
             <select id="from_language" required>
@@ -89,7 +119,7 @@
             </select>
         </div>
     </div>
-    <div class="lang_selector_child">
+    <div class="child">
         <h4>To Language</h4>
         <div class="glossary_select cp_sl02">
 
@@ -129,13 +159,13 @@
         font-size: 0.95em;
     }
 
-    .lang_selector {
+    .parent {
         width: 100%;
         display: flex;
         padding-right: 1em;
     }
 
-    .lang_selector_child {
+    .child {
         width: 300px;
         padding-right: 1em;
     }

@@ -1,12 +1,14 @@
 import os
+from builtins import Exception
 from sys import exit
 
 from flask import Flask, render_template, request, make_response, json
-
-app = Flask(__name__)
 from translate.client import TranslateClient
 from translate.glossary import GlossaryConfig, GlossaryClient
 from google.cloud import storage as gcs
+import datetime
+
+app = Flask(__name__)
 
 PROJECT_ID = os.getenv('PROJECT_ID', None)
 GLOSSARY_LOCATION = os.getenv('GLOSSARY_LOCATION', "us-central1")
@@ -31,12 +33,39 @@ def glossarycat():
 
     content = request.json
     glossaryname = content['glossaryname']
+
     glossary_client = GlossaryClient(PROJECT_ID, GLOSSARY_LOCATION)
     glosasry_detail = glossary_client.describe_glossary(glossaryname)
     print(glosasry_detail)
     input_uri = glosasry_detail.input_config.gcs_source.input_uri
     glossary_input = __get_gcs_input(input_uri)
     return glossary_input
+
+
+@app.route('/createglossary', methods=["POST"])
+def glossarycreate():
+    translated = None
+    if request.method != 'POST':
+        return ""
+
+    content = request.json
+    name = content['glossaryname']
+    now = datetime.datetime.now().strftime("%Y%m%d%H%M")
+    glossaryname = "{}-{}".format(name, now)
+    glossaryinput = content['glossary_input']
+
+    langcodeline = glossaryinput.split("\n")[0]
+    source_lang_code = langcodeline.split(",")[0]
+    target_lang_code = langcodeline.split(",")[1]
+
+    # file = "gs://{}/{}".format(BUCKET_NAME, "{}.csv".format(glossaryname))
+    gcs_input_uri = __create_file(glossaryname, glossaryinput)
+    glossary_client = GlossaryClient(PROJECT_ID, GLOSSARY_LOCATION)
+    result = glossary_client.create_glossary(glossaryname, gcs_input_uri, source_lang_code, target_lang_code)
+
+    print(result)
+
+    return "ok"
 
 
 @app.route('/translate', methods=["POST"])
@@ -76,6 +105,18 @@ def __get_gcs_input(path):
     blob = gcs.Blob(filename, bucket)
     content = blob.download_as_string()
     return content.decode()
+
+
+def __create_file(filename, contents):
+    try:
+        client = gcs.Client(PROJECT_ID)
+        bucket = client.get_bucket(BUCKET_NAME)
+        blob = bucket.blob("{}.csv".format(filename))
+        blob.upload_from_string(contents)
+    except Exception as e:
+        print(e)
+        return ""
+    return "gs://{}/{}.csv".format(BUCKET_NAME, filename)
 
 
 if __name__ == '__main__':
