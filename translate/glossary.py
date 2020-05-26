@@ -67,6 +67,17 @@ class GlossaryClient():
         response = self.client.get_glossary(glossary_path)
         return response
 
+    def delete_glossary(self, glossary_name):
+        '''
+        Describe glossary info
+        :param glossary_name:
+        :return:
+        '''
+        glossary_path = self.__get_glossary_path(glossary_name)
+        logger.debug("Delete:".format(glossary_path))
+        response = self.client.delete_glossary(glossary_path)
+        return(response)
+
     def create_glossary(self, glossary_name, input_uri, source_lang_code, target_lang_code):
         name = self.client.glossary_path(self.project_id, self.location, glossary_name)
 

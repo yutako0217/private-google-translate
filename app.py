@@ -41,6 +41,19 @@ def glossarycat():
     glossary_input = __get_gcs_input(input_uri)
     return glossary_input
 
+@app.route('/deleteglossary', methods=["POST"])
+def deleteglossary():
+    deleteglossary = None
+    if request.method != 'POST':
+        return ""
+
+    content = request.json
+    glossaryname = content['glossaryname']
+
+    glossary_client = GlossaryClient(PROJECT_ID, GLOSSARY_LOCATION)
+    response = glossary_client.delete_glossary(glossaryname)
+    print(response)
+    return 'ok'
 
 @app.route('/createglossary', methods=["POST"])
 def glossarycreate():

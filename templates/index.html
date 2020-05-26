@@ -69,11 +69,23 @@
                 }
             });
         }
+
+        async function deleteGlossary() {
+            const glossary_select = document.getElementById("glossaries").value;
+            const response = await axios({
+                "method": "POST",
+                "url": "/deleteglossary",
+                "data": {
+                    "glossaryname": glossary_select
+                }
+            });
+            console.log(response.data);
+        }
     </script>
 </head>
 <body>
 
-<h3 class="text-muted">Glossary List</h3>
+<h2 class="text-muted">Glossary</h2>
 <div class="parent">
     <div class="child">
         <div class="glossary_select cp_sl02">
@@ -88,24 +100,30 @@
         </div>
     </div>
     <div class="child">
-        <a href="#" class="cp_btn" onclick="getGlossaryCat()">Show Glossary</a>
+        <a href="#" class="cp_btn" onclick="getGlossaryCat()">Glossaryの詳細を見る</a>
+    </div>
+    <div class="child">
+        <a href="#" class="cp_btn" onclick="deleteGlossary()">Glossaryを削除する</a>
+    </div>
+</div>
+<h3 class="text-muted">表示されているGlossaryを新しく登録する場合は、下にGlossary名を入力して、[Create Glossary]ボタンを押してください</h3>
+<div class="parent">
+    <div class="child">
+        <a>new glossary name</a>
+        <input type="text" id="glossary_name" name="glossary_name" width="300"><br>
+    </div>
+    <div class="child">
+        <a href="#" class="cp_btn" onclick="createGlossary()">Glossary を作成する</a>
     </div>
 </div>
 <div class="glossary_cat">
+    <h3 class="text-muted">Glossary に登録してある用語リスト</h3>
     <label for="glossary_cat"></label>
     <textarea class="textarea" id="glossary_cat" name="glossary_cat" rows="10"></textarea><br>
 </div>
 
-<h3 class="text-muted">表示されているGlossaryを新しく登録する場合は、下にGlossary名を入力して、[Create Glossary]ボタンを押してください</h3>
-<div class="parent">
-    <div class="child">
-        <input type="text" id="glossary_name" name="glossary_name" width="300"><br>
-    </div>
-    <div class="child">
-        <a href="#" class="cp_btn" onclick="createGlossary()">Create Glossary</a>
-    </div>
-</div>
-<h3 class="text-muted">Language Select (Default: Japanese　to English)</h3>
+
+<h2 class="text-muted">Language Select (Default: Japanese　to English)</h2>
 <div class="parent">
     <div class="child">
         <h4>From Language</h4>
@@ -116,6 +134,7 @@
                 <option value="ja">ja</option>
                 <option value="es">es</option>
                 <option value="zh">zh</option>
+                <option value="ko">ko</option>
             </select>
         </div>
     </div>
@@ -129,6 +148,7 @@
                 <option value="ja">ja</option>
                 <option value="es">es</option>
                 <option value="zh">zh</option>
+                <option value="ko">ko</option>
             </select>
         </div>
     </div>
@@ -137,6 +157,7 @@
 
 <div class="under-element"></div>
 
+<h2 class="text-muted">Translation</h2>
 <form name="form1">
     <h3 class="text-muted">Input</h3>
     <label for="input"></label>
@@ -167,7 +188,7 @@
 
     .child {
         width: 300px;
-        padding-right: 1em;
+        padding: 1em;
     }
 
     .under-element {
