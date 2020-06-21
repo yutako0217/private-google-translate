@@ -8,13 +8,20 @@ from translate.glossary import GlossaryConfig, GlossaryClient
 from google.cloud import storage as gcs
 import datetime
 
+from logging import basicConfig, getLogger, DEBUG
+
+basicConfig(level=os.getenv("LOGLEVEL", "DEBUG"))
+logger = getLogger(__name__)
+
 app = Flask(__name__)
 
 PROJECT_ID = os.getenv('PROJECT_ID', None)
 GLOSSARY_LOCATION = os.getenv('GLOSSARY_LOCATION', "us-central1")
 BUCKET_NAME = os.getenv('BUCKET_NAME', None)
-
+logger.info('Set arguments PROJECT_ID={},GLOSSARY_LOCATION={},BUCKET_NAME={}'.format(PROJECT_ID, GLOSSARY_LOCATION,
+                                                                                     BUCKET_NAME))
 if PROJECT_ID is None or BUCKET_NAME is None:
+    logger.warning('Need to set environment variables:PROJECT_ID, BUCKET_NAME')
     exit(1)
 
 
@@ -33,6 +40,7 @@ def glossarycat():
 
     content = request.json
     glossaryname = content['glossaryname']
+    logger.info('Called show glossary operation:{}'.format(glossaryname))
 
     glossary_client = GlossaryClient(PROJECT_ID, GLOSSARY_LOCATION)
     glosasry_detail = glossary_client.describe_glossary(glossaryname)
@@ -40,6 +48,7 @@ def glossarycat():
     input_uri = glosasry_detail.input_config.gcs_source.input_uri
     glossary_input = __get_gcs_input(input_uri)
     return glossary_input
+
 
 @app.route('/deleteglossary', methods=["POST"])
 def deleteglossary():
@@ -49,11 +58,13 @@ def deleteglossary():
 
     content = request.json
     glossaryname = content['glossaryname']
+    logger.info('Called delete glossary operation:{}'.format(glossaryname))
 
     glossary_client = GlossaryClient(PROJECT_ID, GLOSSARY_LOCATION)
     response = glossary_client.delete_glossary(glossaryname)
     print(response)
     return 'ok'
+
 
 @app.route('/createglossary', methods=["POST"])
 def glossarycreate():
@@ -67,11 +78,13 @@ def glossarycreate():
     glossaryname = "{}-{}".format(name, now)
     glossaryinput = content['glossary_input']
 
+    logger.info('Called create glossary operation:{}'.format(glossaryname))
+    logger.info('glossary input\n{}'.format(glossaryinput))
+
     langcodeline = glossaryinput.split("\n")[0]
     source_lang_code = langcodeline.split(",")[0]
     target_lang_code = langcodeline.split(",")[1]
 
-    # file = "gs://{}/{}".format(BUCKET_NAME, "{}.csv".format(glossaryname))
     gcs_input_uri = __create_file(glossaryname, glossaryinput)
     glossary_client = GlossaryClient(PROJECT_ID, GLOSSARY_LOCATION)
     result = glossary_client.create_glossary(glossaryname, gcs_input_uri, source_lang_code, target_lang_code)
@@ -104,7 +117,9 @@ def translate():
         else:
             glossary_config = GlossaryConfig(glossaryname, GLOSSARY_LOCATION)
             translated = client.simple_translate(contents, language_to, language_from, glossary_config)
-        print(translated)
+        logger.info('translate input :{}'.format(contents))
+        logger.info('translate output:{}'.format(translated))
+
     merged_string = ''.join(translated)
     return merged_string
 
