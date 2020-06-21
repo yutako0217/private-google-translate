@@ -16,6 +16,7 @@ class TranslateClient:
         self.location = location
         self.client = translate.TranslationServiceClient()
         self.parent = self.client.location_path(self.project_id, self.location)
+        logger.debug("TranslateClient initialized")
 
     def get_glossary_config(self, glossary_name, glossary_location):
         return GlossaryConfig(glossary_name, glossary_location)
@@ -57,6 +58,3 @@ class TranslateClient:
             self.project_id, glossary_location, glossary_name  # The location of the glossary
         )
         return translate.types.TranslateTextGlossaryConfig(glossary=glossary_path)
-
-
-print("Guru99")
