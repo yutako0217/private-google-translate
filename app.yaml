@@ -1,0 +1,7 @@
+# [START django_app]
+runtime: python37
+service: parivate-google-translate
+env_variables:
+  PROJECT_ID: '<YOUR_PROJECT_ID>'
+  BUCKET_NAME: '<BUCKET_NAME_FOR_STORE_GLOSSARY>'
+entrypoint: gunicorn -b :8080 app:app

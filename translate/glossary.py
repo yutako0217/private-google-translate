@@ -14,6 +14,7 @@ class GlossaryConfig():
     def __init__(self, name, location):
         self.name = name
         self.location = location
+        logger.debug("GlossaryConfig initialized")
 
     def get_glossary_config(self):
         return self
@@ -41,6 +42,7 @@ class GlossaryClient():
         self.location = location
         self.client = translate.TranslationServiceClient()
         self.parent = self.client.location_path(project, location)
+        logger.debug("GlossaryClient initialized")
 
     def list_glossary(self):
         '''

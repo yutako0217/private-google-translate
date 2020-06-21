@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html lang="en-US">
 <head>
+    <link rel="stylesheet" href="../static/css/style.css">
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <title>Translation API Demo</title>
 
@@ -20,12 +21,12 @@
                     "to": lang_to
                 }
             });
-            document.form2.output.value = response.data;
+            document.getElementById("output").value = response.data;
             console.log(response.data);
         }
 
         async function submitTranslate() {
-            const text = document.form1.input.value;
+            const text = document.getElementById("input").value;
             const glossary_select = document.getElementById("glossaries").value;
             const lang_from = document.getElementById("from_language").value;
             const lang_to = document.getElementById("to_language").value;
@@ -39,7 +40,7 @@
                     "to": lang_to
                 }
             });
-            document.form2.output.value = response.data;
+            document.getElementById("output").value = response.data;
             console.log(response.data);
         }
 
@@ -83,51 +84,66 @@
         }
     </script>
 </head>
+
+
 <body>
 
-<h2 class="text-muted">Glossary</h2>
-<div class="parent">
-    <div class="child">
-        <div class="glossary_select cp_sl02">
-            <label for="glossaries"></label>
-            <select id="glossaries" required>
-                <option value="" hidden>Choose</option>
-                <option value="---">---</option>
-                {% for glossary in glossaries %}
-                    <option value="{{ glossary }}">{{ glossary }}</option>
-                {% endfor %}
-            </select>
+<body>
+<header>
+    <h1>Private Google Translate</h1>
+    <p>Demo app for private google translate with Translation API Advanced and Cloud Run</p>
+    <p>All word which is translated will be uploaded and stored to Cloud Logging but I don't use any data. This tool is
+        <a href="https://github.com/yutako0217/private-google-translate">on GitHub</a>, feel free to <a
+                href="https://github.com/yutako0217/private-google-translate/issues">report issues</a>.</p>
+    <p class="disclaimer">This is not an officially supported Google product.</p>
+</header>
+
+<main>
+    <div class="group">
+        <h2 class="glossary">Glossary</h2>
+        <div class="parent3box">
+            <div>
+                <div class="select">
+                    <label for="glossaries"></label>
+                    <select id="glossaries" required>
+                        <option value="" hidden>Choose Glossary</option>
+                        <option value="---">---</option>
+                        {% for glossary in glossaries %}
+                            <option value="{{ glossary }}">{{ glossary }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div>
+                <a class="btn" onclick="getGlossaryCat()">Show Glossary Words</a>
+            </div>
+            <div>
+                <a class="btn" onclick="deleteGlossary()">Delete Glossary</a>
+            </div>
+        </div>
+
+        <div class="glossary_cat">
+            <h3 class="text-muted">Word list in the Glossary</h3>
+            <label for="glossary_cat"></label>
+            <textarea class="file csv" id="glossary_cat" name="glossary_cat" rows="10"></textarea><br>
+        </div>
+
+        <h3 class="text-muted">You also can create new glossary. Type new glossary name and click [Create Glossary]
+            button</h3>
+
+        <div class="parent3box">
+            <div><input type="text" class="inputtxt" id="glossary_name" name="glossary_name"
+                        placeholder="New Glossary's Name"></div>
+            <div><a class="btn" onclick="createGlossary()">Create Glossary</a></div>
+
         </div>
     </div>
-    <div class="child">
-        <a href="#" class="cp_btn" onclick="getGlossaryCat()">Glossaryの詳細を見る</a>
-    </div>
-    <div class="child">
-        <a href="#" class="cp_btn" onclick="deleteGlossary()">Glossaryを削除する</a>
-    </div>
-</div>
-<h3 class="text-muted">表示されているGlossaryを新しく登録する場合は、下にGlossary名を入力して、[Create Glossary]ボタンを押してください</h3>
-<div class="parent">
-    <div class="child">
-        <a>new glossary name</a>
-        <input type="text" id="glossary_name" name="glossary_name" width="300"><br>
-    </div>
-    <div class="child">
-        <a href="#" class="cp_btn" onclick="createGlossary()">Glossary を作成する</a>
-    </div>
-</div>
-<div class="glossary_cat">
-    <h3 class="text-muted">Glossary に登録してある用語リスト</h3>
-    <label for="glossary_cat"></label>
-    <textarea class="textarea" id="glossary_cat" name="glossary_cat" rows="10"></textarea><br>
-</div>
 
 
-<h2 class="text-muted">Language Select (Default: Japanese　to English)</h2>
-<div class="parent">
-    <div class="child">
-        <h4>From Language</h4>
-        <div class="glossary_select cp_sl02">
+    <div class="group">
+        <h2 class="source_text">Type Source Text</h2>
+
+        <div class="lang_select">
             <select id="from_language" required>
                 <option value="" hidden>From Language</option>
                 <option value="en">en</option>
@@ -137,11 +153,19 @@
                 <option value="ko">ko</option>
             </select>
         </div>
-    </div>
-    <div class="child">
-        <h4>To Language</h4>
-        <div class="glossary_select cp_sl02">
 
+        <form id="source">
+            <label for="source-sentence"></label>
+            <textarea id="input" class="file input" name="input" onInput="doTranslate(this)">こんにちは</textarea><br>
+        </form>
+        <div>
+            <a class="btn" onclick="submitTranslate()">Translate:)</a>
+        </div>
+    </div>
+
+    <div class="group">
+        <h2 class="translated_text">Translated Text</h2>
+        <div class="lang_select">
             <select id="to_language" required>
                 <option value="" hidden>To Language</option>
                 <option value="en">en</option>
@@ -151,134 +175,11 @@
                 <option value="ko">ko</option>
             </select>
         </div>
+        <div id="to-run">
+            <textarea class="file" id="output" name="output"></textarea><br>
+        </div>
     </div>
-</div>
+
+</main>
 
 
-<div class="under-element"></div>
-
-<h2 class="text-muted">Translation</h2>
-<form name="form1">
-    <h3 class="text-muted">Input</h3>
-    <label for="input"></label>
-    <textarea class="textarea" id="input" name="input" rows="10" onInput="doTranslate(this)"></textarea><br>
-</form>
-<a href="#" class="cp_btn" onclick="submitTranslate()">Translate!!</a>
-
-<form name="form2">
-    <h3 class="text-muted">Translated</h3>
-    <label for="output"></label>
-    <textarea class="textarea" id="output" name="output" rows="10"></textarea><br>
-</form>
-
-
-<style>
-    body {
-        font-family: "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
-        color: #630;
-        line-height: 25px;
-        font-size: 0.95em;
-    }
-
-    .parent {
-        width: 100%;
-        display: flex;
-        padding-right: 1em;
-    }
-
-    .child {
-        width: 300px;
-        padding: 1em;
-    }
-
-    .under-element {
-        clear: both;
-    }
-
-    .textarea {
-        width: 100%
-    }
-
-    a.cp_btn {
-        position: relative;
-        display: block;
-        width: 300px;
-        text-decoration: none;
-        text-overflow: ellipsis;
-        background: #ffffff;
-        border: 1px solid #bbbbbb;
-        border-radius: 2px;
-        padding-right: 1em;
-    }
-
-    a.cp_btn:active {
-        border-bottom: 2px solid #ffffff;
-        box-shadow: 0 0 2px rgba(0, 0, 0, 0.30);
-    }
-
-    .glossary_select {
-        overflow: hidden;
-        width: 300px;
-    {#margin: 2em auto;#} text-align: center;
-    }
-
-    .glossary_select select {
-        width: 300px;
-        padding-right: 1em;
-        cursor: pointer;
-        text-indent: 0.01px;
-        text-overflow: ellipsis;
-        border: none;
-        outline: none;
-        background: transparent;
-        background-image: none;
-        box-shadow: none;
-        -webkit-appearance: none;
-        appearance: none;
-    }
-
-    .glossary_select select::-ms-expand {
-        display: none;
-    }
-
-    .glossary_select.cp_sl02 {
-        position: relative;
-        border: 1px solid #bbbbbb;
-        border-radius: 2px;
-        background: #ffffff;
-    }
-
-    .glossary_select.cp_sl02::before {
-        position: absolute;
-        top: 0.8em;
-        right: 0.9em;
-        width: 0;
-        height: 0;
-        padding: 0;
-        content: '';
-        border-left: 6px solid transparent;
-        border-right: 6px solid transparent;
-        border-top: 6px solid #666666;
-        pointer-events: none;
-    }
-
-    .glossary_select.cp_sl02:after {
-        position: absolute;
-        top: 0;
-        right: 2.5em;
-        bottom: 0;
-        width: 1px;
-        content: '';
-        border-left: 1px solid #bbbbbb;
-    }
-
-    .glossary_select.cp_sl02 select {
-        padding: 8px 38px 8px 8px;
-        color: #666666;
-    }
-
-</style>
-
-
-</body>
-</html>
