@@ -41,7 +41,7 @@ class GlossaryClient():
         self.project_id = project
         self.location = location
         self.client = translate.TranslationServiceClient()
-        self.parent = self.client.location_path(project, location)
+        self.parent = f"projects/{project}/locations/{location}"
         logger.debug("GlossaryClient initialized")
 
     def list_glossary(self):
@@ -51,7 +51,7 @@ class GlossaryClient():
         '''
         glossary_list = []
         print('{:<32}{}'.format("Glossary Name", "Glossary Path"))
-        for element in self.client.list_glossaries(self.parent):
+        for element in self.client.list_glossaries(parent=self.parent):
             path = element.name
             name = path.split('/')[-1]
             glossary_list.append(name)
@@ -66,7 +66,8 @@ class GlossaryClient():
         '''
         glossary_path = self.__get_glossary_path(glossary_name)
         logger.log(DEBUG, glossary_path)
-        response = self.client.get_glossary(glossary_path)
+        logger.log(DEBUG, self.client.glossary_path(self.project_id, "us-central1", glossary_name))
+        response = self.client.get_glossary(name=glossary_path)
         return response
 
     def delete_glossary(self, glossary_name):
@@ -77,7 +78,7 @@ class GlossaryClient():
         '''
         glossary_path = self.__get_glossary_path(glossary_name)
         logger.debug("Delete:".format(glossary_path))
-        response = self.client.delete_glossary(glossary_path)
+        response = self.client.delete_glossary(name=glossary_path)
         return(response)
 
     def create_glossary(self, glossary_name, input_uri, source_lang_code, target_lang_code):
@@ -103,3 +104,4 @@ class GlossaryClient():
         return self.client.glossary_path(
             self.project_id, self.location, glossary_name  # The location of the glossary
         )
+        

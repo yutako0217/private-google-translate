@@ -11,19 +11,32 @@
             const glossary_select = document.getElementById("glossaries").value;
             const lang_from = document.getElementById("from_language").value;
             const lang_to = document.getElementById("to_language").value;
+            const input_data = $this.value
             const response = await axios({
                 "method": "POST",
                 "url": "/translate",
                 "data": {
-                    "text": $this.value,
+                    "text": input_data,
                     "glossaryname": glossary_select,
                     "from": lang_from,
                     "to": lang_to
                 }
             });
-            document.getElementById("output").value = response.data;
-            console.log(response.data);
+            const translated = response.data
+            document.getElementById("output").value = translated;
+            console.log(translated);
+
+            const input_score_response = await axios({
+                "method": "POST",
+                "url": "/score",
+                "data": {
+                    "text": input_data
+                }
+            });
+            document.getElementById("input_text_score").innerHTML = input_score_response.data;
+            console.log(input_score_response.data);
         }
+
 
         async function submitTranslate() {
             const text = document.getElementById("input").value;
@@ -42,6 +55,16 @@
             });
             document.getElementById("output").value = response.data;
             console.log(response.data);
+
+            const input_score_response = await axios({
+                "method": "POST",
+                "url": "/score",
+                "data": {
+                    "text": input_data
+                }
+            });
+            document.getElementById("input_text_score").innerHTML = input_score_response.data;
+            console.log(input_score_response.data);
         }
 
         async function getGlossaryCat() {
@@ -153,11 +176,16 @@
                 <option value="ko">ko</option>
             </select>
         </div>
+        <div class="input_score">
+            <p id="input_text_score">N/A</p>
+        </div>
 
         <form id="source">
             <label for="source-sentence"></label>
             <textarea id="input" class="file input" name="input" onInput="doTranslate(this)">こんにちは</textarea><br>
         </form>
+
+        
         <div>
             <a class="btn" onclick="submitTranslate()">Translate:)</a>
         </div>

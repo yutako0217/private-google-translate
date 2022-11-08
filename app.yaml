@@ -2,6 +2,7 @@
 runtime: python37
 service: parivate-google-translate
 env_variables:
-  PROJECT_ID: '<YOUR_PROJECT_ID>'
-  BUCKET_NAME: '<BUCKET_NAME_FOR_STORE_GLOSSARY>'
+  PROJECT_ID: 'yutty-argolis'
+  BUCKET_NAME: 'yutty-translate-demo'
+  API_KEY: 'AIzaSyA9aUQUboMVShUEGVMEIHrd_q_N2c_MR1U'
 entrypoint: gunicorn -b :8080 app:app

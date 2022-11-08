@@ -9,6 +9,8 @@ from google.cloud import storage as gcs
 import datetime
 
 from logging import basicConfig, getLogger, DEBUG
+from googleapiclient import discovery
+import json
 
 basicConfig(level=os.getenv("LOGLEVEL", "DEBUG"))
 logger = getLogger(__name__)
@@ -18,11 +20,17 @@ app = Flask(__name__)
 PROJECT_ID = os.getenv('PROJECT_ID', None)
 GLOSSARY_LOCATION = os.getenv('GLOSSARY_LOCATION', "us-central1")
 BUCKET_NAME = os.getenv('BUCKET_NAME', None)
+API_KEY = os.getenv('API_KEY', None)
+
 logger.info('Set arguments PROJECT_ID={},GLOSSARY_LOCATION={},BUCKET_NAME={}'.format(PROJECT_ID, GLOSSARY_LOCATION,
                                                                                      BUCKET_NAME))
 if PROJECT_ID is None or BUCKET_NAME is None:
     logger.warning('Need to set environment variables:PROJECT_ID, BUCKET_NAME')
     exit(1)
+
+score_client = discovery.build("commentanalyzer","v1alpha1",developerKey=API_KEY,
+discoveryServiceUrl="https://commentanalyzer.googleapis.com/$discovery/rest?version=v1alpha1",
+static_discovery=False,)
 
 
 @app.route('/')
@@ -111,7 +119,7 @@ def translate():
             language_to = 'en'
 
         client = TranslateClient(PROJECT_ID, GLOSSARY_LOCATION)
-
+        
         if glossaryname == "" or glossaryname == "---":
             translated = client.simple_translate(contents, language_to, language_from, None)
         else:
@@ -119,11 +127,32 @@ def translate():
             translated = client.simple_translate(contents, language_to, language_from, glossary_config)
         logger.info('translate input :{}'.format(contents))
         logger.info('translate output:{}'.format(translated))
+        # score = analyze(contents)
+        # logger.info('translate input score:{}'.format(score))
 
     merged_string = ''.join(translated)
     return merged_string
 
+@app.route('/score', methods=["POST"])
+def scoring():
+    if request.method == 'POST':
+        content = request.json
+        contents = content['text']
+        if contents == '':
+            return ''
+        score = analyze(contents)
+        return str(score)
+        
 
+def analyze(contents):
+    analyze_request = {
+        'comment': { 'text': contents },
+        'requestedAttributes': {'TOXICITY': {}}
+        }
+    response = score_client.comments().analyze(body=analyze_request).execute()
+    score = response['attributeScores']['TOXICITY']['summaryScore']['value']
+    return score
+ 
 def __get_gcs_input(path):
     bucket_name = path.split("/")[2]
     client = gcs.Client(PROJECT_ID)

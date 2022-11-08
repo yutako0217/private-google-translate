@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import os
 from logging import basicConfig, getLogger, DEBUG, ERROR
-from google.cloud import translate_v3 as translate
+from google.cloud import translate
 
 # これはメインのファイルにのみ書く
 from translate.glossary import GlossaryConfig
@@ -15,7 +15,7 @@ class TranslateClient:
         self.project_id = projectid
         self.location = location
         self.client = translate.TranslationServiceClient()
-        self.parent = self.client.location_path(self.project_id, self.location)
+        self.parent = f"projects/{self.project_id}/locations/{self.location}"
         logger.debug("TranslateClient initialized")
 
     def get_glossary_config(self, glossary_name, glossary_location):
@@ -32,13 +32,22 @@ class TranslateClient:
                 logger.log(ERROR, 'Source language code must be specified for requests that use glossaries.')
                 exit()
             glossary_config = self.__glossary_config_for_translate(glossary_name, glossary_location)
+            # response = self.client.translate_text(
+            #     contents=[text],
+            #     source_language_code=source_lang_code,
+            #     target_language_code=target_lang_code,
+            #     parent=self.parent,
+            #     glossary_config=glossary_config,
+            #     mime_type='text/plain'
+            # )
             response = self.client.translate_text(
-                contents=[text],
-                source_language_code=source_lang_code,
-                target_language_code=target_lang_code,
-                parent=self.parent,
-                glossary_config=glossary_config,
-                mime_type='text/plain'
+                request={
+                    "contents": [text],
+                    "target_language_code": target_lang_code,
+                    "source_language_code": source_lang_code,
+                    "parent": self.parent,
+                    "glossary_config": glossary_config,
+                }
             )
             logger.log(DEBUG, response)
             for translation in response.glossary_translations:
@@ -57,4 +66,4 @@ class TranslateClient:
         glossary_path = self.client.glossary_path(
             self.project_id, glossary_location, glossary_name  # The location of the glossary
         )
-        return translate.types.TranslateTextGlossaryConfig(glossary=glossary_path)
+        return translate.TranslateTextGlossaryConfig(glossary=glossary_path)
